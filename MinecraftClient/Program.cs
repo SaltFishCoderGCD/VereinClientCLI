@@ -11,9 +11,10 @@ using MinecraftClient.Protocol.SessionCache;
 namespace MinecraftClient
 {
     /// <summary>
-    /// Minecraft Console Client by ORelio and Contributors (c) 2012-2016.
+    /// Minecraft Console Client by SaltyFishGCD and Contributors (c) 2012-2018.
     /// Allows to connect to any Minecraft server, send and receive text, automated scripts.
     /// This source code is released under the CDDL 1.0 License.
+    /// Misaka Mikoto,9982,10031,10032,10777,19090 powered.
     /// </summary>
 
     static class Program
@@ -36,7 +37,7 @@ namespace MinecraftClient
         {
             Console.WriteLine("Console Client for MC {0} to {1} - v{2} - By ORelio & Contributors", MCLowestVersion, MCHighestVersion, Version);
 
-            //Basic Input/Output ?
+            //BIOS
             if (args.Length >= 1 && args[args.Length - 1] == "BasicIO")
             {
                 ConsoleIO.basicIO = true;
@@ -44,7 +45,7 @@ namespace MinecraftClient
                 args = args.Where(o => !Object.ReferenceEquals(o, args[args.Length - 1])).ToArray();
             }
 
-            //Process ini configuration file
+            //设置ini设置文件
             if (args.Length >= 1 && System.IO.File.Exists(args[0]) && System.IO.Path.GetExtension(args[0]).ToLower() == ".ini")
             {
                 Settings.LoadSettings(args[0]);
@@ -60,7 +61,7 @@ namespace MinecraftClient
             }
             else Settings.WriteDefaultSettings("MinecraftClient.ini");
 
-            //Other command-line arguments
+            //其他命令行参数
             if (args.Length >= 1)
             {
                 Settings.Login = args[0];
@@ -86,7 +87,7 @@ namespace MinecraftClient
                 Console.Title = Settings.ExpandVars(Settings.ConsoleTitle);
             }
 
-            //Load cached sessions from disk if necessary
+            //有必要的话启用本地cache
             if (Settings.SessionCaching == CacheType.Disk)
             {
                 bool cacheLoaded = SessionCache.InitializeDiskCache();
@@ -120,14 +121,14 @@ namespace MinecraftClient
             if (Settings.Password == "") { Settings.Password = "-"; }
             if (!ConsoleIO.basicIO)
             {
-                //Hide password length
+                //隐藏密码长度
                 Console.CursorTop--; Console.Write("Password : <******>");
                 for (int i = 19; i < Console.BufferWidth; i++) { Console.Write(' '); }
             }
         }
 
         /// <summary>
-        /// Start a new Client
+        /// 创建新客户端进程
         /// </summary>
 
         private static void InitializeClient()
@@ -138,7 +139,7 @@ namespace MinecraftClient
 
             if (Settings.Password == "-")
             {
-                ConsoleIO.WriteLineFormatted("§8You chose to run in offline mode.");
+                ConsoleIO.WriteLineFormatted("§8离线模式：ON.");
                 result = ProtocolHandler.LoginResult.Success;
                 session.PlayerID = "0";
                 session.PlayerName = Settings.Login;
@@ -152,7 +153,7 @@ namespace MinecraftClient
                     result = ProtocolHandler.GetTokenValidation(session);
                     if (result != ProtocolHandler.LoginResult.Success)
                     {
-                        ConsoleIO.WriteLineFormatted("§8Cached session is invalid or expired.");
+                        ConsoleIO.WriteLineFormatted("§8缓存过期或错误");
                         if (Settings.Password == "")
                             RequestPassword();
                     }
@@ -161,7 +162,7 @@ namespace MinecraftClient
 
                 if (result != ProtocolHandler.LoginResult.Success)
                 {
-                    Console.WriteLine("Connecting to Minecraft.net...");
+                    Console.WriteLine("连接到 Minecraft.net...");
                     result = ProtocolHandler.GetLogin(Settings.Login, Settings.Password, out session);
 
                     if (result == ProtocolHandler.LoginResult.Success && Settings.SessionCaching != CacheType.None)
@@ -183,7 +184,7 @@ namespace MinecraftClient
                     ConsoleIcon.setPlayerIconAsync(Settings.Username);
 
                 if (Settings.DebugMessages)
-                    Console.WriteLine("Success. (session ID: " + session.ID + ')');
+                    Console.WriteLine("连接成功 (session ID: " + session.ID + ')');
 
                 //ProtocolHandler.RealmsListWorlds(Settings.Username, PlayerID, sessionID); //TODO REMOVE
 
@@ -216,7 +217,7 @@ namespace MinecraftClient
 
                 if (protocolversion == 0)
                 {
-                    Console.WriteLine("Retrieving Server Info...");
+                    Console.WriteLine("获取服务器信息...");
                     if (!ProtocolHandler.GetServerInfo(Settings.ServerIP, Settings.ServerPort, ref protocolversion, ref forgeInfo))
                     {
                         HandleFailure("Failed to ping this IP.", true, ChatBots.AutoRelog.DisconnectReason.ConnectionLost);
@@ -228,14 +229,14 @@ namespace MinecraftClient
                 {
                     try
                     {
-                        //Start the main TCP client
+                        //创建主TCP进程
                         if (Settings.SingleCommand != "")
                         {
                             Client = new McTcpClient(session.PlayerName, session.PlayerID, session.ID, Settings.ServerIP, Settings.ServerPort, protocolversion, forgeInfo, Settings.SingleCommand);
                         }
                         else Client = new McTcpClient(session.PlayerName, session.PlayerID, session.ID, protocolversion, forgeInfo, Settings.ServerIP, Settings.ServerPort);
 
-                        //Update console title
+                        //更新控制台title
                         if (Settings.ConsoleTitle != "")
                             Console.Title = Settings.ExpandVars(Settings.ConsoleTitle);
                     }
@@ -246,7 +247,7 @@ namespace MinecraftClient
             else
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
-                string failureMessage = "Minecraft Login failed : ";
+                string failureMessage = "Minecraft 登录失败 : ";
                 switch (result)
                 {
                     case ProtocolHandler.LoginResult.AccountMigrated: failureMessage += "Account migrated, use e-mail as username."; break;
@@ -278,7 +279,7 @@ namespace MinecraftClient
             {
                 if (Client != null) { Client.Disconnect(); ConsoleIO.Reset(); }
                 if (offlinePrompt != null) { offlinePrompt.Abort(); offlinePrompt = null; ConsoleIO.Reset(); }
-                Console.WriteLine("Restarting Minecraft Console Client...");
+                Console.WriteLine("重启中...");
                 InitializeClient();
             })).Start();
         }
