@@ -131,6 +131,7 @@ namespace MinecraftClient
 
             if (!singlecommand)
             {
+                //if (Settings.AntiAFK_Enabled) { BotLoad(new ChatBots.AntiAFK(Settings.AntiAFK_Delay)); }
                 if (Settings.AntiAFK_Enabled) { BotLoad(new ChatBots.AntiAFK(Settings.AntiAFK_Delay)); }
                 if (Settings.Hangman_Enabled) { BotLoad(new ChatBots.HangmanGame(Settings.Hangman_English)); }
                 if (Settings.Alerts_Enabled) { BotLoad(new ChatBots.Alerts()); }
